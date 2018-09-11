@@ -65,17 +65,14 @@ int main(int argc, char** argv){
       else if(image.at<uchar>(i,j) == 70){
         hole_computed=false; 
       }
-	  if(image.at<uchar>(i,j) == 0){
-		// object found
-		if(!hole_computed){ 
-		  nholes++;
-	      while(image.at<uchar>(i,j) != 140) j++;
+			if(image.at(i,j) == 0 && !hole_computed){
+				nholes++;
+				while(image.at(i,j) != 140) j++;
+				p.x=j;
+				p.y=i;
+			  floodFill(image,p,210);
+			}
 		}
-		p.x=j;
-		p.y=i;
-		floodFill(image,p,210);
-	  }
-	}
   }
   //70 for background
   //0 for holes

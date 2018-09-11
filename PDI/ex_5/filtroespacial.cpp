@@ -21,6 +21,7 @@ void menu(){
     "v - vertical\n"
 	"h - horizontal\n"
     "l - laplaciano\n"
+    "x - LoG\n"
 	"esc - sair\n";
 }
 
@@ -41,6 +42,11 @@ int main(int argvc, char** argv){
   float laplacian[]={0,-1,0,
 					 -1,4,-1,
 					 0,-1,0};
+  float LoG[]={0,0,-1,0,0,
+               0,-1,-2,-1,0,
+              -1,-2,16,-2,-1,
+               0,-1,-2,-1,0,
+               0,0,-1,0,0 };
 
   Mat cap, frame, frame32f, frameFiltered;
   Mat mask(3,3,CV_32F), mask1;
@@ -48,7 +54,6 @@ int main(int argvc, char** argv){
   double width, height, min, max;
   int absolut;
   char key;
-	bool lagauss;
 
   video.open(0);
   if(!video.isOpened())
@@ -66,29 +71,14 @@ int main(int argvc, char** argv){
   absolut=1; // calcs abs of the image
 
   menu();
-	lagauss=false;
   for(;;){
     video >> cap;
     cvtColor(cap, frame, CV_BGR2GRAY);
     flip(frame, frame, 1);
     imshow("original", frame);
     frame.convertTo(frame32f, CV_32F);
-		if(!lagauss)
     	filter2D(frame32f, frameFiltered,
-				 frame32f.depth(), mask, Point(1,1), 0);
-			
-		else{
-			//gaussian
-      mask = Mat(3, 3, CV_32F, gauss);
-      scaleAdd(mask, 1/16.0, Mat::zeros(3,3,CV_32F), mask1);
-      mask = mask1;
-    	filter2D(frame32f, frameFiltered,
-				 frame32f.depth(), mask, Point(1,1), 0);
-      mask = Mat(3, 3, CV_32F, laplacian);
-			//laplacian
-    	filter2D(frameFiltered, frameFiltered,
-				 frameFiltered.depth(), mask, Point(1,1), 0);
-		}
+				 frame32f.depth(), mask, Point(1,1), 0);		
 		
     if(absolut){
       frameFiltered=abs(frameFiltered);
@@ -97,7 +87,6 @@ int main(int argvc, char** argv){
     imshow("filtroespacial", result);
     key = (char) waitKey(10);
     if( key == 27 ) break; // esc pressed!
-		if( key != 'x') lagauss=false;
     switch(key){
 			case 'a':
 				menu();
@@ -133,7 +122,9 @@ int main(int argvc, char** argv){
 				printmask(mask);
 				break;
 			case 'x':
-				lagauss=true;
+				menu();
+				mask = Mat(5, 5, CV_32F, LoG);
+				printmask(mask);
 				break;
 			default:
 				break;
